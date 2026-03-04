@@ -26,8 +26,12 @@ trace.zip
 *.bak
 Thumbs.db
 .DS_Store
+desktop.ini
 *.tmp
 *.lock
+
+# ---- Virtual env ----
+venv/
 
 # ---- Git Specific ----
 *.orig

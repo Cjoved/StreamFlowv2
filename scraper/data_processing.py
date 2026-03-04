@@ -54,10 +54,27 @@ def scrape_current_page(page, scraper):
 MAX_RETRIES = 3  # Number of times to wait for the table before reloading
 MAX_RELOADS = 3  # Maximum times to reload the page
 
+# Message shown by DPWH when a year/station has no daily discharge data
+INSUFFICIENT_DATA_TEXT = "insufficient to produce the requested information"
+
+
+def is_insufficient_data_page(page):
+    """Returns True if the page shows DPWH 'insufficient data' message (no table to scrape)."""
+    try:
+        body_text = page.locator("body").inner_text()
+        return INSUFFICIENT_DATA_TEXT.lower() in body_text.lower()
+    except Exception:
+        return False
+
 
 def scrape_data(page, scraper, reload_attempts=0):
     """Extracts data from the table while handling empty cells properly."""
     try:
+        # Check for "insufficient data" page first — no table, so skip and don't retry
+        if is_insufficient_data_page(page):
+            print("[INFO] No data for this year (insufficient data). Skipping.")
+            return True  # Treat as success so we move to next year link
+
         success = False
         for attempt in range(MAX_RETRIES):
             table = page.locator("table.mystyle tbody")
